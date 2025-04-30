@@ -420,6 +420,8 @@ func findFiles(dir string, screenshotOnly bool, dirToSkip string, verbose bool) 
 		"dist":         true,
 		"vendor":       true,
 		"venv":         true,
+		"venvs":        true, // Add venvs (e.g., from pipx)
+		"deps":         true, // Add deps
 	}
 
 	// --- Initialize Progress Bar (mpb) ---
