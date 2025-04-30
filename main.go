@@ -705,58 +705,61 @@ func analyzeAndProcessFiles(sourceFiles, destFiles []FileInfo, sourceDir, destDi
 					pathStyle.Render(file.Path))
 			}
 		} else {
-			// This is a unique file (not in destination)
-			uniqueCount++
+			// This is a unique file (not in destination based on hash)
+			// Only process/copy uniques if NOT in delete mode
+			if !deleteMode {
+				uniqueCount++
 
-			if verboseMode {
-				fmt.Printf("%s %s\n",
-					uniqueStyle.Render("[UNIQUE]"),
-					highlightStyle.Render(file.Name))
-			}
-
-			// Check if a file with the same name already exists
-			if _, exists := destNameMap[file.Name]; exists {
-				// Same name but different content
-				newName := renameFile(file.Name)
 				if verboseMode {
-					fmt.Printf("  %s\n  %s %s\n",
-						infoStyle.Render("File with same name but different content exists."),
-						infoStyle.Render("Will rename to:"),
-						highlightStyle.Render(newName))
+					fmt.Printf("%s %s\n",
+						uniqueStyle.Render("[UNIQUE] "), // Added space for alignment
+						highlightStyle.Render(file.Name))
 				}
 
-				// Copy file to destination with new name
-				if !dryRun {
-					destPath := filepath.Join(destDir, newName)
-					fmt.Printf("%s %s\n",
-						successStyle.Render("Copying to:"),
-						pathStyle.Render(destPath))
-					if err := copyFile(file.Path, destPath); err != nil {
-						fmt.Println(errorStyle.Render(fmt.Sprintf("Error copying file: %v", err)))
+				// Check if a file with the same name already exists
+				if _, exists := destNameMap[file.Name]; exists {
+					// Same name but different content
+					newName := renameFile(file.Name)
+					if verboseMode {
+						fmt.Printf("  %s\n  %s %s\n",
+							infoStyle.Render("File with same name but different content exists."),
+							infoStyle.Render("Will rename to:"),
+							highlightStyle.Render(newName))
+					}
+
+					// Copy file to destination with new name
+					if !dryRun {
+						destPath := filepath.Join(destDir, newName)
+						fmt.Printf("%s %s\n",
+							successStyle.Render("Copying renamed to:"),
+							pathStyle.Render(destPath))
+						if err := copyFile(file.Path, destPath); err != nil {
+							fmt.Println(errorStyle.Render(fmt.Sprintf("Error copying file: %v", err)))
+						}
+					} else {
+						destPath := filepath.Join(destDir, newName)
+						fmt.Printf("%s %s → %s\n",
+							dryRunStyle.Render("[PRETEND] Would copy renamed:"),
+							pathStyle.Render(file.Path),
+							pathStyle.Render(destPath))
 					}
 				} else {
-					destPath := filepath.Join(destDir, newName)
-					fmt.Printf("%s %s → %s\n",
-						dryRunStyle.Render("[PRETEND] Would copy:"),
-						pathStyle.Render(file.Path),
-						pathStyle.Render(destPath))
-				}
-			} else {
-				// Unique name and content
-				if !dryRun {
-					destPath := filepath.Join(destDir, file.Name)
-					fmt.Printf("%s %s\n",
-						successStyle.Render("Copying to:"),
-						pathStyle.Render(destPath))
-					if err := copyFile(file.Path, destPath); err != nil {
-						fmt.Println(errorStyle.Render(fmt.Sprintf("Error copying file: %v", err)))
+					// Unique name and content
+					if !dryRun {
+						destPath := filepath.Join(destDir, file.Name)
+						fmt.Printf("%s %s\n",
+							successStyle.Render("Copying unique to:"),
+							pathStyle.Render(destPath))
+						if err := copyFile(file.Path, destPath); err != nil {
+							fmt.Println(errorStyle.Render(fmt.Sprintf("Error copying file: %v", err)))
+						}
+					} else {
+						destPath := filepath.Join(destDir, file.Name)
+						fmt.Printf("%s %s → %s\n",
+							dryRunStyle.Render("[PRETEND] Would copy unique:"),
+							pathStyle.Render(file.Path),
+							pathStyle.Render(destPath))
 					}
-				} else {
-					destPath := filepath.Join(destDir, file.Name)
-					fmt.Printf("%s %s → %s\n",
-						dryRunStyle.Render("[PRETEND] Would copy:"),
-						pathStyle.Render(file.Path),
-						pathStyle.Render(destPath))
 				}
 			}
 		}
