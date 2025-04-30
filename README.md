@@ -139,9 +139,9 @@ dedupe --scan-home -v
     - **Name Collisions:** Source file hash is unique, but its name exists in the destination.
     - **Unique Files:** Source file name and hash are both unique relative to the destination.
 7.  **Execute (or Dry Run):**
-    - **Dry Run (Default):** Reports planned actions (copy, delete, rename) without changing anything.
-    - **Execute (`-e`):** Copies unique files and renamed files to the destination.
-    - **Execute + Delete (`-e -d`):** Deletes duplicate source files instead of copying unique/renamed ones.
+    - **Dry Run (Default):** Reports planned actions (copy, delete, rename) without changing anything. If `-d` is used, it shows which duplicates *would* be deleted.
+    - **Execute (`-e`):** Copies unique files and renamed files to the destination. *Does not delete anything unless `-d` is also specified.*
+    - **Execute + Delete (`-e -d`):** Deletes duplicate source files. *Does not copy unique or renamed files.* This mode focuses solely on removing duplicates from the source.
 
 ## License
 
